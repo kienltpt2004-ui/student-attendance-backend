@@ -45,7 +45,7 @@ public class TeacherController {
         );
     }
 
-    @GetMapping("/search")
+    @GetMapping("/search-bycode")
     public ResponseEntity<ApiResponse<TeacherResponse>> search(@RequestParam String teacherCode){
         TeacherResponse teacher = teacherService.getByTeacherCode(teacherCode);
 

@@ -50,7 +50,7 @@ public class StudentController {
         );
     }
 
-    @GetMapping("/admin/students/search")
+    @GetMapping("/admin/students/search-bycode")
     public ResponseEntity<ApiResponse<StudentResponse>> search(@RequestParam String studentCode){
         StudentResponse student = studentService.getByStudentCode(studentCode);
 
