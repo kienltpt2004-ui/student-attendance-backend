@@ -8,6 +8,11 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClassRequest {
+
+    @NotBlank(message = "Tên phòng không được để trống")
+    @Size(max = 15, message = "Tên phòng tối đa 15 ký tự")
+    private String classroom;
+
     @NotBlank(message = "Tên lớp không được để trống")
     @Size(max = 100, message = "Tên lớp tối đa 100 ký tự")
     private String name;
@@ -15,7 +20,4 @@ public class ClassRequest {
     @NotBlank(message = "Tên môn học không được để trống")
     @Size(max = 100, message = "Tên môn học tối đa 100 ký tự")
     private String subjectName;
-
-    @NotNull(message = "TeacherId không được để trống")
-    private Long teacherId;
 }

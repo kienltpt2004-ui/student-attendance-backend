@@ -27,7 +27,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/**",
+            "/api/auth/login",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
@@ -43,8 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         //phân quyền cho admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/teacher/**").hasRole("TEACHER")
-                        .requestMatchers("/api/student/**").hasRole("STUDENT")
+                        .requestMatchers("/api/teachers/**").hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers("/api/students/**").hasAnyRole("STUDENT", "ADMIN")
                         //.requestMatchers("/api/**").hasAnyRole("TEACHER","STUDENT", "ADMIN")
                         .anyRequest().authenticated()
                 )

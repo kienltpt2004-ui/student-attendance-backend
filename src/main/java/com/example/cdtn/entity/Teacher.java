@@ -1,11 +1,13 @@
 package com.example.cdtn.entity;
 
+import com.example.cdtn.entity.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +30,15 @@ public class Teacher {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @Column(nullable = false)
-    private Integer age;
+    @Column(length = 15)
+    private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)

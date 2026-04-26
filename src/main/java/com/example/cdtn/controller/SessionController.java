@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/teacher/sessions")
+@RequestMapping("api/teachers/sessions")
 public class SessionController {
     private final SessionService service;
     public SessionController(SessionService service){
@@ -58,7 +58,7 @@ public class SessionController {
         );
     }
 
-    @PutMapping("{id}/close")
+    @PostMapping("{id}/close")
     public ResponseEntity<ApiResponse<?>> closeSession(@PathVariable Long id){
         service.closeSession(id);
 

@@ -1,6 +1,9 @@
 package com.example.cdtn.dto.request;
+import com.example.cdtn.entity.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -15,10 +18,18 @@ public class TeacherRequest {
     @Size(max = 100, message = "Tên giảng viên tối đa 100 ký tự")
     private String fullName;
 
-    @NotNull(message = "Tuổi không được để trống")
-    @Min(value = 22, message = "Tuổi phải >= 22")
-    @Max(value = 100, message = "Tuổi phải <= 100")
-    private Integer age;
+    @Pattern(
+            regexp = "^(0|\\+84)\\d{9}$",
+            message = "Số điện thoại không hợp lệ"
+    )
+    private String phone;
+
+    @NotNull(message = "Giới tính không được để trống")
+    private Gender gender;
+
+    @NotNull(message = "Ngày sinh không được để trống")
+    @Past(message = "Ngày sinh phải là ngày trong quá khứ")
+    private LocalDate dateOfBirth;
 
     @NotBlank(message = "Email không được để trống")
     @Pattern(

@@ -2,10 +2,13 @@ package com.example.cdtn.controller;
 
 import com.example.cdtn.dto.request.TeacherRequest;
 import com.example.cdtn.dto.response.ApiResponse;
+import com.example.cdtn.dto.response.MetaData;
+import com.example.cdtn.dto.response.StudentResponse;
 import com.example.cdtn.dto.response.TeacherResponse;
 import com.example.cdtn.entity.enums.Status;
 import com.example.cdtn.service.TeacherService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,14 +23,38 @@ public class TeacherController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TeacherResponse>>> getAllTeaachers(){
-        List<TeacherResponse> teachers = teacherService.getAllTeachers();
+    public ResponseEntity<ApiResponse<List<TeacherResponse>>> getAllTeachers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Page<TeacherResponse> teacherPage = teacherService.getAllTeachers(page, size);
+
+        MetaData meta = new MetaData(
+                teacherPage.getNumber(),
+                teacherPage.getTotalPages()
+        );
+
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         "Lấy danh sách giảng viên thành công",
                         Status.SUCCESS,
                         "",
-                        teachers
+                        teacherPage.getContent(),
+                        meta
+                )
+        );
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<TeacherResponse>> search(@RequestParam String teacherCode){
+        TeacherResponse teacher = teacherService.getByTeacherCode(teacherCode);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "Lấy thông tin giảng viên thành công",
+                        Status.SUCCESS,
+                        "",
+                        teacher
                 )
         );
     }

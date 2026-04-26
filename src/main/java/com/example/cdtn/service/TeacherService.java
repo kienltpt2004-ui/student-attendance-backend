@@ -12,6 +12,9 @@ import com.example.cdtn.exception.BadRequestException;
 import com.example.cdtn.exception.ResourceNotFoundException;
 import com.example.cdtn.repository.TeacherRepository;
 import com.example.cdtn.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +43,10 @@ public class TeacherService {
         if(teacherRepository.existsByTeacherCode(request.getTeacherCode())){
             throw new BadRequestException("Mã giảng viên đã tồn tại");
         }
+        if (request.getPhone() != null &&
+                teacherRepository.existsByPhone(request.getPhone())) {
+            throw new BadRequestException("Số điện thoại đã tồn tại");
+        }
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -51,19 +58,27 @@ public class TeacherService {
         Teacher teacher = new Teacher();
         teacher.setTeacherCode(request.getTeacherCode());
         teacher.setFullName(request.getFullName());
-        teacher.setAge(request.getAge());
+        teacher.setPhone(request.getPhone());
+        teacher.setGender(request.getGender());
+        teacher.setDateOfBirth(request.getDateOfBirth());
         teacher.setUser(savedUser);
 
         teacherRepository.save(teacher);
         return mapToResponse(teacher);
     }
 
-    public List<TeacherResponse> getAllTeachers(){
+    public Page<TeacherResponse> getAllTeachers(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
 
-        return teacherRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
+        return teacherRepository.findAll(pageable)
+                .map(this::mapToResponse);
+    }
+
+    public TeacherResponse getByTeacherCode(String code){
+        Teacher teacher = teacherRepository.findByTeacherCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giảng viên"));
+
+        return mapToResponse(teacher);
     }
 
     public TeacherResponse getTeacherById(Long id){
@@ -77,7 +92,9 @@ public class TeacherService {
                 .orElseThrow(() -> new ResourceNotFoundException("Giảng viên không tồn tại với Id " + id));
 
         teacher.setFullName(request.getFullName());
-        teacher.setAge(request.getAge());
+        teacher.setPhone(request.getPhone());
+        teacher.setGender(request.getGender());
+        teacher.setDateOfBirth(request.getDateOfBirth());
 
         teacherRepository.save(teacher);
 
@@ -96,7 +113,9 @@ public class TeacherService {
                 .id(teacher.getId())
                 .teacherCode(teacher.getTeacherCode())
                 .fullName(teacher.getFullName())
-                .age(teacher.getAge())
+                .phone(teacher.getPhone())
+                .gender(teacher.getGender())
+                .dateOfBirth(teacher.getDateOfBirth())
                 .email(teacher.getUser().getEmail())
                 .build();
     }

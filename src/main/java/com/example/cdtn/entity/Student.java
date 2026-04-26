@@ -1,11 +1,13 @@
 package com.example.cdtn.entity;
 
+import com.example.cdtn.entity.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,11 +29,21 @@ public class Student {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @Column(nullable = false)
-    private Integer age;
-
     @Column(nullable = false, length = 100)
     private String department;
+
+    @Column(length = 15)
+    private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(length = 255)
+    private String address;
 
     // ĐÃ THÊM: đánh dấu sinh viên đã đăng ký khuôn mặt hay chưa
     @Column(name = "face_registered", nullable = false)

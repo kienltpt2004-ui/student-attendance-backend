@@ -40,6 +40,7 @@ public class Session {
     private Double latitude;
     private Double longitude;
     private Double radius;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SessionStatus status = SessionStatus.OPEN;

@@ -6,6 +6,7 @@ import com.example.cdtn.dto.auth.LoginResponse;
 import com.example.cdtn.entity.User;
 import com.example.cdtn.exception.ResourceNotFoundException;
 import com.example.cdtn.repository.UserRepository;
+import com.example.cdtn.security.CustomUserDetails;
 import com.example.cdtn.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -44,12 +45,13 @@ public class AuthService {
                 .role(user.getRole())
                 .build();
     }
-
     public AuthMeResponse me() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        CustomUserDetails userDetails =
+                (CustomUserDetails) SecurityContextHolder.getContext()
+                        .getAuthentication()
+                        .getPrincipal();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+        User user = userDetails.getUser();
 
         return AuthMeResponse.builder()
                 .id(user.getId())
@@ -57,4 +59,21 @@ public class AuthService {
                 .role(user.getRole())
                 .build();
     }
+
+//    public AuthMeResponse me() {
+//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+//
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//
+//        System.out.println("AUTH: " + auth);
+//        System.out.println("PRINCIPAL CLASS: " + auth.getPrincipal().getClass());
+//
+//        return AuthMeResponse.builder()
+//                .id(user.getId())
+//                .email(user.getEmail())
+//                .role(user.getRole())
+//                .build();
+//    }
 }

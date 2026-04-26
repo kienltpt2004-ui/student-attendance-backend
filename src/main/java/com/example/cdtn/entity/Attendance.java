@@ -38,12 +38,18 @@ public class Attendance {
     private AttendanceStatus status;
 
     // Bắt buộc với Face Recognition
-    @Column(name = "confidence_score", nullable = false)
+    @Column(name = "confidence_score")
     private Double confidenceScore;
 
     // Lưu ảnh để audit (nếu có)
     @Column(name = "face_image_url")
     private String faceImageUrl;
+
+    private Double latitude;
+    private Double longitude;
+
+    @Column(name = "check_in_time")
+    private LocalDateTime checkInTime;
 
     @CreationTimestamp
     @Column(name = "created_at")
