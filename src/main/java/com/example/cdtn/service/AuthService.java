@@ -59,21 +59,4 @@ public class AuthService {
                 .role(user.getRole())
                 .build();
     }
-
-//    public AuthMeResponse me() {
-//        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-//
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//
-//        System.out.println("AUTH: " + auth);
-//        System.out.println("PRINCIPAL CLASS: " + auth.getPrincipal().getClass());
-//
-//        return AuthMeResponse.builder()
-//                .id(user.getId())
-//                .email(user.getEmail())
-//                .role(user.getRole())
-//                .build();
-//    }
 }

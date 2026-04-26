@@ -133,7 +133,7 @@ public class StudentService {
             throw new BadRequestException("Ảnh không hợp lệ");
         }
 
-        // 🔥 lấy từ token
+        //lấy từ token
         Student student = getCurrentStudent();
 
         if (Boolean.TRUE.equals(student.getFaceRegistered())) {
@@ -159,7 +159,7 @@ public class StudentService {
 
             System.out.println("Compare with " + s.getId() + " -> " + distance);
 
-            // 🔥 threshold chuẩn
+            //threshold chuẩn
             if (distance < 0.4) {
                 throw new BadRequestException("Khuôn mặt đã tồn tại trong hệ thống");
             }
@@ -178,7 +178,7 @@ public class StudentService {
             throw new BadRequestException("Ảnh không hợp lệ");
         }
 
-        // 🔥 lấy từ token
+        //lấy từ token
         Student student = getCurrentStudent();
 
         if (!Boolean.TRUE.equals(student.getFaceRegistered())) {
@@ -215,103 +215,7 @@ public class StudentService {
 
         studentRepository.save(student);
     }
-//    @Transactional
-//    public void registerFace(Long studentId, String imageBase64) {
-//
-//        if (imageBase64 == null || imageBase64.isEmpty()) {
-//            throw new BadRequestException("Ảnh không hợp lệ");
-//        }
-//
-//        // ===== 1. LẤY STUDENT =====
-//        Student student = studentRepository.findById(studentId)
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Sinh viên không tồn tại với Id " + studentId));
-//
-//        if (Boolean.TRUE.equals(student.getFaceRegistered())) {
-//            throw new BadRequestException("Sinh viên đã đăng kí khuôn mặt");
-//        }
-//
-//        // ===== 2. GỌI AI LẤY EMBEDDING =====
-//        String newEmbedding = faceApiService.registerFace(imageBase64);
-//
-//        // ===== 3. CHECK TRÙNG KHUÔN MẶT (QUAN TRỌNG) =====
-//        List<Student> students = studentRepository.findAll();
-//
-//        for (Student s : students) {
-//
-//            // bỏ qua chính mình
-//            if (s.getId().equals(studentId)) continue;
-//
-//            // bỏ qua user chưa có face
-//            if (s.getFaceEmbedding() == null) continue;
-//
-//            // gọi API verify (DÙNG DISTANCE)
-//            FaceVerifyResponse res = faceApiService.verifyFace(
-//                    imageBase64,                 // ảnh mới
-//                    s.getFaceEmbedding()         // embedding cũ
-//            );
-//
-//            double distance = res.getDistance();
-//
-//            System.out.println("DISTANCE = " + distance);
-//            System.out.println("Compare with student " + s.getId() + " -> " + distance);
-//
-//            //NGƯỠNG QUAN TRỌNG
-//            if (distance < 0.4) {
-//                throw new BadRequestException("Khuôn mặt đã tồn tại trong hệ thống");
-//            }
-//        }
-//
-//        // ===== 4. LƯU =====
-//        student.setFaceEmbedding(newEmbedding);
-//        student.setFaceRegistered(true);
-//
-//        studentRepository.save(student);
-//    }
-//    public void updateFace(Long studentId, String imageBase64) {
-//
-//        if (imageBase64 == null || imageBase64.isEmpty()) {
-//            throw new BadRequestException("Ảnh không hợp lệ");
-//        }
-//
-//        // 1. Lấy student
-//        Student student = studentRepository.findById(studentId)
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Sinh viên không tồn tại với Id " + studentId));
-//
-//        if (!Boolean.TRUE.equals(student.getFaceRegistered())) {
-//            throw new BadRequestException("Sinh viên chưa đăng ký khuôn mặt");
-//        }
-//
-//        // 2. Lấy embedding mới
-//        String embedding = faceApiService.registerFace(imageBase64);
-//        List<Double> newEmbedding = convert(embedding);
-//
-//        // 3. Lấy tất cả student khác
-//        List<Student> students =
-//                studentRepository.findByFaceRegisteredTrueAndIdNot(studentId);
-//
-//        // 4. So sánh bằng DISTANCE
-//        for (Student s : students) {
-//
-//            if (s.getFaceEmbedding() == null) continue;
-//
-//            List<Double> oldEmbedding = convert(s.getFaceEmbedding());
-//
-//            double distance = calculateDistance(newEmbedding, oldEmbedding);
-//
-//            System.out.println("Compare with " + s.getId() + " -> " + distance);
-//
-//            // 🔥 THRESHOLD CHUẨN
-//            if (distance < 0.4) {
-//                throw new BadRequestException("Khuôn mặt đã tồn tại trong hệ thống");
-//            }
-//        }
-//
-//        // 5. Save
-//        student.setFaceEmbedding(embedding);
-//        studentRepository.save(student);
-//    }
+
     private double calculateDistance(List<Double> a, List<Double> b) {
         double sum = 0;
 
@@ -329,17 +233,6 @@ public class StudentService {
                 .map(Double::parseDouble)
                 .toList();
     }
-//    public double cosineSimilarity(List<Double> a, List<Double> b) {
-//        double dot = 0, normA = 0, normB = 0;
-//
-//        for (int i = 0; i < a.size(); i++) {
-//            dot += a.get(i) * b.get(i);
-//            normA += a.get(i) * a.get(i);
-//            normB += b.get(i) * b.get(i);
-//        }
-//
-//        return dot / (Math.sqrt(normA) * Math.sqrt(normB));
-//    }
 
     private StudentResponse mapToResponse(Student student){
         return StudentResponse.builder()

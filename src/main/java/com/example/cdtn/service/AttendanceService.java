@@ -49,7 +49,7 @@ public class AttendanceService {
 
     public AttendanceResponse checkIn(AttendanceRequest request) {
 
-        // ✅ LẤY STUDENT TỪ TOKEN (QUAN TRỌNG NHẤT)
+        // LẤY STUDENT TỪ TOKEN
         Student student = getCurrentStudent();
 
         Session session = sessionRepo.findById(request.getSessionId())
@@ -71,7 +71,7 @@ public class AttendanceService {
             throw new BadRequestException("Đã điểm danh rồi");
         }
 
-        // ===== GPS =====
+        //GPS
         double distance = calculateDistance(
                 request.getLatitude(),
                 request.getLongitude(),
@@ -83,7 +83,7 @@ public class AttendanceService {
             throw new BadRequestException("Ngoài phạm vi lớp");
         }
 
-        // ===== FACE =====
+        //FACE
         FaceVerifyResponse faceRes = faceApiService.verifyFace(
                 request.getImage(),
                 student.getFaceEmbedding()
@@ -104,7 +104,7 @@ public class AttendanceService {
                 : AttendanceStatus.PRESENT;
 
         Attendance attendance = new Attendance();
-        attendance.setStudent(student); // ✅ luôn là chính user
+        attendance.setStudent(student);
         attendance.setSession(session);
         attendance.setStatus(status);
         attendance.setLatitude(request.getLatitude());
@@ -117,76 +117,6 @@ public class AttendanceService {
 
         return mapToResponse(saved);
     }
-
-//    public AttendanceResponse checkIn(AttendanceRequest request) {
-//
-////        Student student = studentRepo.findById(request.getStudentId())
-////                .orElseThrow(() -> new ResourceNotFoundException("không tìm thấy sinh viên"));
-//
-//        Session session = sessionRepo.findById(request.getSessionId())
-//                .orElseThrow(() -> new ResourceNotFoundException("không tìm thấy session"));
-//
-//        if (student.getFaceEmbedding() == null) {
-//            throw new BadRequestException("Chưa đăng ký khuôn mặt");
-//        }
-//
-//        if (session.getStatus() != SessionStatus.OPEN) {
-//            throw new BadRequestException("Session đã đóng");
-//        }
-//
-//        if (!classStudentRepo.existsByStudentAndClasses(student, session.getClasses())) {
-//            throw new BadRequestException("Sinh viên không thuộc lớp");
-//        }
-//
-//        if (attendanceRepo.existsByStudentAndSession(student, session)) {
-//            throw new BadRequestException("Đã điểm danh rồi");
-//        }
-//
-//        // GPS
-//        double distance = calculateDistance(
-//                request.getLatitude(),
-//                request.getLongitude(),
-//                session.getLatitude(),
-//                session.getLongitude()
-//        );
-//
-//        if (distance > session.getRadius()) {
-//            throw new BadRequestException("Ngoài phạm vi lớp");
-//        }
-//
-//        // FACE
-//        FaceVerifyResponse faceRes = faceApiService.verifyFace(
-//                request.getImage(),
-//                student.getFaceEmbedding()
-//        );
-//
-//        if (!faceRes.isMatch()) {
-//            throw new BadRequestException("Face không hợp lệ");
-//        }
-//
-//        LocalDateTime now = LocalDateTime.now();
-//        if (now.isAfter(session.getStartTime().plusMinutes(30))) {
-//            throw new BadRequestException("Đã quá thời gian điểm danh");
-//        }
-//
-//        AttendanceStatus status = now.isAfter(session.getStartTime().plusMinutes(10))
-//                ? AttendanceStatus.LATE
-//                : AttendanceStatus.PRESENT;
-//
-//        Attendance attendance = new Attendance();
-//        attendance.setStudent(student);
-//        attendance.setSession(session);
-//        attendance.setStatus(status);
-//        attendance.setLatitude(request.getLatitude());
-//        attendance.setLongitude(request.getLongitude());
-//
-//        attendance.setCheckInTime(now);
-//
-//        attendance.setConfidenceScore(1 - faceRes.getDistance());
-//        Attendance saved = attendanceRepo.save(attendance);
-//
-//        return mapToResponse(saved);
-//    }
 
     //CREATE ABSENT
     public void generateAbsent(Session session) {
