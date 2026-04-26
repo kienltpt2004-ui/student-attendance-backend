@@ -90,7 +90,7 @@ public class StudentController {
         );
     }
 
-    @PutMapping("/admin/students/{id}")
+    @PutMapping("/admin/students/{id:\\d+}")
     public ResponseEntity<ApiResponse<StudentResponse>> updateStudent(@PathVariable Long id,
                                                                       @Valid @RequestBody StudentRequest request){
         StudentResponse student = studentService.updateStudent(id,request);
@@ -104,7 +104,7 @@ public class StudentController {
         );
     }
 
-    @DeleteMapping("/admin/students/{id}")
+    @DeleteMapping("/admin/students/{id:\\d+}")
     public ApiResponse<?> deleteStudent(@PathVariable Long id){
         studentService.deleteStudent(id);
         return new ApiResponse<>(
