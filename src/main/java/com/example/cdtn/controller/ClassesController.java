@@ -60,7 +60,7 @@ public class ClassesController {
         );
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<ClassResponse>> getByClassId(@PathVariable Long id,
                                                                    @RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "5") int size) {
@@ -80,7 +80,7 @@ public class ClassesController {
                 )
         );
     }
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<ClassResponse>> updateClass(@PathVariable Long id,
                                                                   @Valid @RequestBody ClassRequest request){
         return ResponseEntity.ok(

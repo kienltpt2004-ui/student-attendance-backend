@@ -64,7 +64,7 @@ public class StudentController {
         );
     }
 
-    @GetMapping("/admin/students/{id}")
+    @GetMapping("/admin/students/{id:\\d+}")
     public ResponseEntity<ApiResponse<StudentResponse>> getStudentById(@PathVariable Long id){
         StudentResponse student = studentService.getStudentById(id);
         return ResponseEntity.ok(

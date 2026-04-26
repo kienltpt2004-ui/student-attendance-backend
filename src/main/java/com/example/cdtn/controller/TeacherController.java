@@ -72,7 +72,7 @@ public class TeacherController {
         );
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<TeacherResponse>> getTeacherByid(@PathVariable Long id){
         TeacherResponse teacher = teacherService.getTeacherById(id);
         return ResponseEntity.ok(
@@ -84,7 +84,7 @@ public class TeacherController {
                 )
         );
     }
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<TeacherResponse>> updateTeacher(@PathVariable Long id,
                                                                          @Valid @RequestBody TeacherRequest request){
         TeacherResponse teacher = teacherService.updateTeacher(id, request);
@@ -98,7 +98,7 @@ public class TeacherController {
         );
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<?>> deleteTeacher(@PathVariable Long id){
         teacherService.deleteTeacher(id);
         return ResponseEntity.ok(

@@ -41,7 +41,7 @@ public class ReportController {
     }
 
     // 2. LỊCH SỬ 1 SINH VIÊN
-    @GetMapping("/student/{id}")
+    @GetMapping("/student/{id:\\d+}")
     public ResponseEntity<ApiResponse<List<StudentAttendanceResponse>>> getStudentHistory(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,

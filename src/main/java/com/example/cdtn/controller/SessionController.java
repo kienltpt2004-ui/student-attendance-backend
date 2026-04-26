@@ -32,7 +32,7 @@ public class SessionController {
         );
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{id:\\d+}")
     public ResponseEntity<ApiResponse<SessionResponse>> getSessionById(@PathVariable Long id){
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -58,7 +58,7 @@ public class SessionController {
         );
     }
 
-    @PostMapping("{id}/close")
+    @PostMapping("{id:\\d+}/close")
     public ResponseEntity<ApiResponse<?>> closeSession(@PathVariable Long id){
         service.closeSession(id);
 
