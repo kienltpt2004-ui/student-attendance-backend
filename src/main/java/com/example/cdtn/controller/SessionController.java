@@ -3,7 +3,6 @@ package com.example.cdtn.controller;
 import com.example.cdtn.dto.request.SessionRequest;
 import com.example.cdtn.dto.response.ApiResponse;
 import com.example.cdtn.dto.response.SessionResponse;
-import com.example.cdtn.entity.Session;
 import com.example.cdtn.entity.enums.Status;
 import com.example.cdtn.service.SessionService;
 import jakarta.validation.Valid;
@@ -27,7 +26,7 @@ public class SessionController {
                         "Lấy danh sách session theo lớp thành công",
                         Status.SUCCESS,
                         "",
-                        service.getAllSessionByClass(classId)
+                        service.getMySessions(classId)
                 )
         );
     }
@@ -39,14 +38,14 @@ public class SessionController {
                         "Lấy thông tin session thành công",
                         Status.SUCCESS,
                         "",
-                        service.getSessionById(id)
+                        service.getByIdForTeacher(id)
                 )
         );
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<SessionResponse>> createSession(@Valid @RequestBody SessionRequest request){
-        SessionResponse session = service.createSession(request);
+        SessionResponse session = service.createForTeacher(request);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
@@ -60,7 +59,7 @@ public class SessionController {
 
     @PostMapping("{id:\\d+}/close")
     public ResponseEntity<ApiResponse<?>> closeSession(@PathVariable Long id){
-        service.closeSession(id);
+        service.close(id);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(

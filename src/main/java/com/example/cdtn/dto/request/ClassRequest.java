@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ClassRequest {
 
+    private Long teacherId;
     @NotBlank(message = "Tên phòng không được để trống")
     @Size(max = 15, message = "Tên phòng tối đa 15 ký tự")
     private String classroom;

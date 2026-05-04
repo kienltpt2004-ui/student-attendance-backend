@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-//@Builder
 public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
@@ -185,10 +184,10 @@ public class StudentService {
             throw new BadRequestException("Sinh viên chưa đăng ký khuôn mặt");
         }
 
-        // 1. lấy embedding mới
+        //lấy embedding mới
         String newEmbedding = faceApiService.registerFace(imageBase64);
 
-        // 2. check trùng
+        //check trùng
         List<Student> students =
                 studentRepository.findByFaceRegisteredTrueAndIdNot(student.getId());
 
@@ -210,7 +209,7 @@ public class StudentService {
             }
         }
 
-        // 3. save
+        //save
         student.setFaceEmbedding(newEmbedding);
 
         studentRepository.save(student);

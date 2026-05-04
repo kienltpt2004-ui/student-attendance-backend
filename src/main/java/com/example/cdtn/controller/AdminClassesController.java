@@ -1,34 +1,36 @@
 package com.example.cdtn.controller;
 
+
 import com.example.cdtn.dto.request.ClassRequest;
 import com.example.cdtn.dto.response.ApiResponse;
 import com.example.cdtn.dto.response.ClassResponse;
 import com.example.cdtn.dto.response.MetaData;
-import com.example.cdtn.dto.response.StudentResponse;
 import com.example.cdtn.entity.enums.Status;
 import com.example.cdtn.service.ClassesService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 @RestController
-@RequestMapping("api/teachers/classes")
-public class ClassesController {
+@RequestMapping("/api/admin/classes")
+@PreAuthorize("hasRole('ADMIN')") // chỉ admin truy cập
+public class AdminClassesController {
 
     private final ClassesService classesService;
 
-    public ClassesController(ClassesService classesService) {
+    public AdminClassesController(ClassesService classesService) {
         this.classesService = classesService;
     }
 
+    //GET ALL
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ClassResponse>>> getAllClass(
+    public ResponseEntity<ApiResponse<?>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
-    ){
-        Page<ClassResponse> classPage = classesService.getMyClasses(page, size);
+    ) {
+        Page<ClassResponse> classPage = classesService.getAllClasses(page, size);
 
         MetaData meta = new MetaData(
                 classPage.getNumber(),
@@ -37,7 +39,7 @@ public class ClassesController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
-                        "Lấy danh sách lớp thành công",
+                        "Admin lấy danh sách tất cả lớp",
                         Status.SUCCESS,
                         "",
                         classPage.getContent(),
@@ -46,26 +48,50 @@ public class ClassesController {
         );
     }
 
+    //CREATE
     @PostMapping
-    public ResponseEntity<ApiResponse<ClassResponse>> createClass(@Valid @RequestBody ClassRequest request) {
+    public ResponseEntity<ApiResponse<ClassResponse>> create(
+            @Valid @RequestBody ClassRequest request
+    ) {
+        ClassResponse data = classesService.createForAdmin(request);
+
         return ResponseEntity.ok(
                 new ApiResponse<>(
-                        "Tạo lớp thành công",
+                        "Admin tạo lớp thành công",
                         Status.SUCCESS,
                         "",
-                        classesService.createForTeacher(request)
+                        data
                 )
         );
     }
 
+    //UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ClassResponse>> update(
+            @PathVariable Long id,
+            @RequestBody ClassRequest request
+    ) {
+        ClassResponse data = classesService.updateForAdmin(id, request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "Admin cập nhật lớp thành công",
+                        Status.SUCCESS,
+                        "",
+                        data
+                )
+        );
+    }
+
+    //GET CLASS DETAIL (ADMIN)
     @GetMapping("/{id:\\d+}")
-    public ResponseEntity<ApiResponse<ClassResponse>> getByClassId(
+    public ResponseEntity<ApiResponse<ClassResponse>> getClassById(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
 
-        ClassResponse data = classesService.getClassDetailForTeacher(id, page, size);
+        ClassResponse data = classesService.getClassDetailForAdmin(id, page, size);
 
         MetaData metaData = new MetaData(
                 page,
@@ -74,7 +100,7 @@ public class ClassesController {
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
-                        "Chi tiết lớp",
+                        "Chi tiết lớp (admin)",
                         Status.SUCCESS,
                         "",
                         data,
@@ -82,46 +108,40 @@ public class ClassesController {
                 )
         );
     }
-    @PutMapping("/{id:\\d+}")
-    public ResponseEntity<ApiResponse<ClassResponse>> updateClass(@PathVariable Long id,
-                                                                  @Valid @RequestBody ClassRequest request){
+
+    //Add Student
+    @PostMapping("/{classId}/students/{studentId}")
+    public ResponseEntity<ApiResponse<?>> addStudent(
+            @PathVariable Long classId,
+            @PathVariable Long studentId
+    ) {
+        classesService.addStudentForAdmin(classId, studentId);
+
         return ResponseEntity.ok(
                 new ApiResponse<>(
-                        "Cập nhật lớp thành công",
+                        "Admin thêm sinh viên thành công",
                         Status.SUCCESS,
                         "",
-                        classesService.updateForTeacher(id, request)
+                        null
                 )
         );
     }
 
-    @PostMapping("/{classId}/students/{studentId}")
-    public ResponseEntity<ApiResponse<?>> addStudent(@PathVariable Long classId,
-                                                     @PathVariable Long studentId) {
-
-        classesService.addStudent(classId, studentId);
-
-        return ResponseEntity.ok(
-                new ApiResponse<>(
-                        "Thêm sinh viên thành công",
-                        Status.SUCCESS,
-                        "",
-                        null)
-        );
-    }
-
+    //Remove Student
     @DeleteMapping("/{classId}/students/{studentId}")
-    public ResponseEntity<ApiResponse<?>> removeStudent(@PathVariable Long classId,
-                                                        @PathVariable Long studentId) {
-
-        classesService.removeStudent(classId, studentId);
+    public ResponseEntity<ApiResponse<?>> removeStudent(
+            @PathVariable Long classId,
+            @PathVariable Long studentId
+    ) {
+        classesService.removeStudentForAdmin(classId, studentId);
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
-                        "Xóa sinh viên thành công",
+                        "Admin xóa sinh viên thành công",
                         Status.SUCCESS,
                         "",
-                        null)
+                        null
+                )
         );
     }
 }

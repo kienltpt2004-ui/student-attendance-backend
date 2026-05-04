@@ -31,11 +31,11 @@ public class SessionService {
         this.attendanceService = attendanceService;
     }
 
-    //GET CURRENT TEACHER
+
     private Teacher getCurrentTeacher() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth == null || !(auth.getPrincipal() instanceof CustomUserDetails user)) {
+        if (!(auth.getPrincipal() instanceof CustomUserDetails user)) {
             throw new BadRequestException("Chưa đăng nhập");
         }
 
@@ -43,99 +43,163 @@ public class SessionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy teacher"));
     }
 
-    //CREATE SESSION
-    public SessionResponse createSession(SessionRequest request) {
+
+    private Classes getClassForTeacher(Long classId) {
+        return classesRepository
+                .findByIdAndTeacher_Id(classId, getCurrentTeacher().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không có quyền"));
+    }
+
+    private Classes getClassOrThrow(Long classId) { // ADMIN dùng
+        return classesRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp"));
+    }
+
+    //TEACHER
+    public List<SessionResponse> getMySessions(Long classId) {
+        Classes classes = getClassForTeacher(classId);
+        return getByClass(classes.getId());
+    }
+
+    //ADMIN
+    public List<SessionResponse> getAllSessions(Long classId) {
+        Classes classes = getClassOrThrow(classId);
+        return getByClass(classes.getId());
+    }
+
+    private List<SessionResponse> getByClass(Long classId) {
+        return sessionRepository.findByClasses_Id(classId)
+                .stream()
+                .map(this::map)
+                .toList();
+    }
+    //GET BY ID
+
+    // Teacher
+    public SessionResponse getByIdForTeacher(Long id) {
 
         Teacher teacher = getCurrentTeacher();
 
-        Classes classes = classesRepository
-                .findByIdAndTeacher_Id(request.getClassId(), teacher.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp"));
+        //check quyền ngay từ query
+        Session s = sessionRepository
+                .findByIdAndClasses_Teacher_Id(id, teacher.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không có quyền hoặc không tồn tại"));
 
-        if (request.getEndTime().isBefore(request.getStartTime())) {
+        return map(s);
+    }
+    // Admin
+    public SessionResponse getByIdForAdmin(Long id) {
+
+        Session s = sessionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy session"));
+
+        return map(s);
+    }
+
+    //CREATE
+    public SessionResponse createForTeacher(SessionRequest req) {
+
+        Classes classes = getClassForTeacher(req.getClassId()); //đã check quyền
+
+        if (req.getEndTime().isBefore(req.getStartTime())) {
             throw new BadRequestException("EndTime phải sau StartTime");
         }
 
-        Session session = new Session();
-        session.setClasses(classes);
-        session.setTitle(request.getTitle());
-        session.setStartTime(request.getStartTime());
-        session.setEndTime(request.getEndTime());
-        session.setLatitude(request.getLatitude());
-        session.setLongitude(request.getLongitude());
-        session.setRadius(request.getRadius());
-        session.setStatus(SessionStatus.OPEN);
+        Session s = new Session();
+        s.setClasses(classes);
+        s.setTitle(req.getTitle());
+        s.setStartTime(req.getStartTime());
+        s.setEndTime(req.getEndTime());
+        s.setLatitude(req.getLatitude());
+        s.setLongitude(req.getLongitude());
+        s.setRadius(req.getRadius());
+        s.setStatus(SessionStatus.OPEN);
 
-        sessionRepository.save(session);
-
-        return mapToResponse(session);
+        sessionRepository.save(s);
+        return map(s);
     }
 
-    //GET ALL SESSION BY CLASS
-    public List<SessionResponse> getAllSessionByClass(Long classId) {
+    //CLOSE
+    public void close(Long id) {
 
-        Teacher teacher = getCurrentTeacher();
+        Teacher teacher = getCurrentTeacher(); // NEW
 
-        Classes classes = classesRepository
-                .findByIdAndTeacher_Id(classId, teacher.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp"));
+        //check quyền ngay từ query
+        Session s = sessionRepository
+                .findByIdAndClasses_Teacher_Id(id, teacher.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không có quyền hoặc không tồn tại"));
 
-        return sessionRepository.findByClasses_Id(classes.getId())
-                .stream()
-                .map(this::mapToResponse)
-                .toList();
-    }
-
-    //GET SESSION BY ID
-    public SessionResponse getSessionById(Long id) {
-
-        Teacher teacher = getCurrentTeacher();
-
-        Session session = sessionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy session"));
-
-        if (!session.getClasses().getTeacher().getId().equals(teacher.getId())) {
-            throw new BadRequestException("Không có quyền");
-        }
-
-        return mapToResponse(session);
-    }
-
-    //CLOSE SESSION
-    public void closeSession(Long id) {
-
-        Teacher teacher = getCurrentTeacher();
-
-        Session session = sessionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy session"));
-
-        if (!session.getClasses().getTeacher().getId().equals(teacher.getId())) {
-            throw new BadRequestException("Không có quyền đóng session này");
-        }
-
-        if (session.getStatus() == SessionStatus.ClOSED) {
+        if (s.getStatus() == SessionStatus.CLOSED) {
             throw new BadRequestException("Session đã đóng rồi");
         }
 
-        session.setStatus(SessionStatus.ClOSED);
+        s.setStatus(SessionStatus.CLOSED);
 
-        attendanceService.generateAbsent(session);
+        attendanceService.generateAbsent(s);
 
-        sessionRepository.save(session);
+        sessionRepository.save(s);
+    }
+    //CLOSE (ADMIN)
+
+    public void closeForAdmin(Long id) {
+
+        // ADMIN không check teacher
+        Session s = sessionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy session"));
+
+        // validate đã đóng chưa
+        if (s.getStatus() == SessionStatus.CLOSED) {
+            throw new BadRequestException("Session đã đóng rồi");
+        }
+
+        s.setStatus(SessionStatus.CLOSED);
+
+        // generate absent
+        attendanceService.generateAbsent(s);
+
+        sessionRepository.save(s);
+    }
+    //CREATE (ADMIN)
+
+    public SessionResponse createForAdmin(SessionRequest req) {
+
+        // ADMIN không check teacher
+        Classes classes = getClassOrThrow(req.getClassId());
+
+        // validate thời gian
+        if (req.getEndTime().isBefore(req.getStartTime())) {
+            throw new BadRequestException("EndTime phải sau StartTime");
+        }
+
+        Session s = new Session();
+        s.setClasses(classes);
+        s.setTitle(req.getTitle());
+        s.setStartTime(req.getStartTime());
+        s.setEndTime(req.getEndTime());
+
+        // GPS
+        s.setLatitude(req.getLatitude());
+        s.setLongitude(req.getLongitude());
+        s.setRadius(req.getRadius());
+
+        s.setStatus(SessionStatus.OPEN);
+
+        sessionRepository.save(s);
+
+        return map(s);
     }
 
-    // ===== MAP =====
-    private SessionResponse mapToResponse(Session session) {
+    private SessionResponse map(Session s) {
         return SessionResponse.builder()
-                .id(session.getId())
-                .classId(session.getClasses().getId())
-                .title(session.getTitle())
-                .startTime(session.getStartTime())
-                .endTime(session.getEndTime())
-                .latitude(session.getLatitude())
-                .longitude(session.getLongitude())
-                .radius(session.getRadius())
-                .status(session.getStatus().name())
+                .id(s.getId())
+                .classId(s.getClasses().getId())
+                .title(s.getTitle())
+                .startTime(s.getStartTime())
+                .endTime(s.getEndTime())
+                .latitude(s.getLatitude())
+                .longitude(s.getLongitude())
+                .radius(s.getRadius())
+                .status(s.getStatus().name())
                 .build();
     }
 }

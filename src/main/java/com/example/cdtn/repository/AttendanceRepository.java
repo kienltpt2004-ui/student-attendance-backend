@@ -24,4 +24,9 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     );
 
     Page<Attendance> findByStudent_Id(Long id, Pageable pageable);
+    List<Attendance> findTop5BySession_Classes_IdAndSession_Classes_Teacher_IdOrderByCheckInTimeDesc(
+            Long classId,
+            Long teacherId
+    );
+    List<Attendance> findBySession_IdIn(List<Long> sessionIds);
 }

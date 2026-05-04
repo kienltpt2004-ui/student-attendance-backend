@@ -2,9 +2,7 @@ package com.example.cdtn.controller;
 
 import com.example.cdtn.dto.response.ApiResponse;
 import com.example.cdtn.dto.response.MetaData;
-import com.example.cdtn.dto.response.report.ClassMatrixResponse;
-import com.example.cdtn.dto.response.report.SessionAttendanceResponse;
-import com.example.cdtn.dto.response.report.StudentAttendanceResponse;
+import com.example.cdtn.dto.response.report.*;
 import com.example.cdtn.entity.enums.Status;
 import com.example.cdtn.service.ReportService;
 import org.springframework.core.io.ByteArrayResource;
@@ -77,7 +75,7 @@ public class ReportController {
         );
     }
 
-    //export classmatrix
+    //EXPORT CLASSMATRIX
     @GetMapping("/class/{classId}/export")
     public ResponseEntity<ByteArrayResource> exportClassMatrix(@PathVariable Long classId) {
 
@@ -89,7 +87,7 @@ public class ReportController {
                 .body(file);
     }
 
-    //export session
+    //EXPORT SESSION
     @GetMapping("/session/{sessionId}/export")
     public ResponseEntity<ByteArrayResource> exportSession(@PathVariable Long sessionId) {
 
@@ -99,5 +97,40 @@ public class ReportController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=session.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(file);
+    }
+
+    //LAY 5 DIEM DANH MOI NHAT
+    @GetMapping("/recent/{classId:\\d+}")
+    public ApiResponse<List<RecentAttendanceResponse>> getRecentByClass(@PathVariable Long classId) {
+
+        return new ApiResponse<>(
+                "Lấy 5 điểm danh mới nhất thành công",
+                Status.SUCCESS,
+                "",
+                reportService.getRecentAttendancesByClass(classId)
+        );
+    }
+
+    //THỐNG KÊ 1 TUẦN CỦA CÁC LỚP THUỘC TEACHER
+    @GetMapping("/stats/weekly")
+    public ApiResponse<WeeklyStatsResponse> getWeeklyStats() {
+
+        return new ApiResponse<>(
+                "Thống kê 1 tuần thành công",
+                Status.SUCCESS,
+                "",
+                reportService.getWeeklyStats()
+        );
+    }
+
+    //THỐNG KÊ 1 TUẦN CỦA 1 LỚP THUỘC TEACHER
+    @GetMapping("/stats/class/{classId}")
+    public ApiResponse<ClassStatsResponse> getClassStats(@PathVariable Long classId) {
+        return new ApiResponse<>(
+                "Thống kê lớp thành công",
+                Status.SUCCESS,
+                "",
+                reportService.getWeeklyStatsByClass(classId)
+        );
     }
 }

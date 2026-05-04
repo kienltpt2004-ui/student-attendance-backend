@@ -12,4 +12,16 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     List<Session> findByClasses_Id(Long classId);
     List<Session> findByStatusAndEndTimeBefore(SessionStatus status, LocalDateTime time);
     Optional<Session> findByIdAndClasses_Teacher_Id(Long id, Long teacherId);
+    List<Session> findByClasses_IdInAndStartTimeBetween(
+            List<Long> classIds,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+    List<Session> findByClasses_IdAndStartTimeBetween(
+            Long classId,
+            LocalDateTime from,
+            LocalDateTime to
+    );
+
+    List<Session> findByClasses_IdIn(List<Long> classIds);
 }

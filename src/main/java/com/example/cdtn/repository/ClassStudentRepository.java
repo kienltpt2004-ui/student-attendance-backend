@@ -6,6 +6,7 @@ import com.example.cdtn.entity.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,11 @@ public interface ClassStudentRepository extends JpaRepository<ClassStudent, Long
 
     List<ClassStudent> findByClasses(Classes classes);
     List<ClassStudent> findAllByClasses_Id(Long classId);
+
+    @Query("""
+    SELECT COUNT(DISTINCT cs.student.id)
+    FROM ClassStudent cs
+    WHERE cs.classes.id IN :classIds
+    """)
+    long countDistinctStudentsByClassIds(List<Long> classIds);
 }

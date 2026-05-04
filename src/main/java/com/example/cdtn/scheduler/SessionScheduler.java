@@ -34,7 +34,7 @@ public class SessionScheduler {
 
             System.out.println("Đóng session: " + session.getId());
 
-            session.setStatus(SessionStatus.ClOSED);
+            session.setStatus(SessionStatus.CLOSED);
 
             attendanceService.generateAbsent(session);
 
