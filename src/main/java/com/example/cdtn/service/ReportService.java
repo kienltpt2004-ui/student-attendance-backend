@@ -2,6 +2,7 @@ package com.example.cdtn.service;
 
 import com.example.cdtn.dto.response.report.*;
 import com.example.cdtn.entity.*;
+import com.example.cdtn.entity.enums.AttendanceStatus;
 import com.example.cdtn.exception.BadRequestException;
 import com.example.cdtn.exception.ResourceNotFoundException;
 import com.example.cdtn.repository.*;
@@ -482,16 +483,17 @@ public class ReportService {
         long totalAbsent = attendances.stream()
                 .filter(a -> a.getStatus().name().equals("ABSENT"))
                 .count();
+        long totalPresent = totalAttendances - totalAbsent;
 
         double attendanceRate = totalAttendances == 0
                 ? 0
-                : ((double) (totalAttendances - totalAbsent)
-                / totalAttendances) * 100;
+                : ((double) totalPresent / totalAttendances) * 100;
 
         ClassStatsResponse res = new ClassStatsResponse();
         res.setTotalStudents(totalStudents);
         res.setTotalSessions(totalSessions);
         res.setTotalAttendances(totalAttendances);
+        res.setTotalPresent(totalPresent);
         res.setTotalAbsent(totalAbsent);
         res.setAttendanceRate(attendanceRate);
 
