@@ -608,7 +608,6 @@ public class ReportService {
     }
 
 //     ADMIN - LỊCH SỬ ĐIỂM DANH 1 SINH VIÊN
-
     public Page<StudentAttendanceResponse> getStudentHistoryForAdmin(
             Long studentId,
             int page,
@@ -645,5 +644,104 @@ public class ReportService {
 
             return res;
         });
+    }
+    //export điểm danh của 1 lớp
+    public ByteArrayResource exportClassMatrixExcelForAdmin(Long classId) {
+
+        List<ClassMatrixResponse> data = getClassMatrixForAdmin(classId);
+
+        if (data.isEmpty()) {
+            throw new RuntimeException("Không có dữ liệu");
+        }
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Admin Class Attendance");
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Student Name");
+
+        List<String> sessions = new ArrayList<>(data.get(0).getAttendanceMap().keySet());
+
+        for (int i = 0; i < sessions.size(); i++) {
+            Cell cell = header.createCell(i + 1);
+            cell.setCellValue(sessions.get(i));
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowIndex = 1;
+
+        for (ClassMatrixResponse student : data) {
+            Row row = sheet.createRow(rowIndex++);
+            row.createCell(0).setCellValue(student.getStudentName());
+
+            int col = 1;
+            for (String s : sessions) {
+                row.createCell(col++)
+                        .setCellValue(student.getAttendanceMap().get(s));
+            }
+        }
+
+        for (int i = 0; i <= sessions.size(); i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            workbook.write(out);
+            workbook.close();
+            return new ByteArrayResource(out.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Export admin class lỗi");
+        }
+    }
+    //export điểm danh của 1 buổi học
+    public ByteArrayResource exportSessionExcelForAdmin(Long sessionId) {
+
+        List<SessionAttendanceResponse> data =
+                getSessionReportForAdmin(sessionId);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Admin Session Report");
+
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Student");
+        header.createCell(1).setCellValue("Status");
+        header.createCell(2).setCellValue("Check-in");
+        header.createCell(3).setCellValue("Confidence");
+
+        int rowIndex = 1;
+
+        for (SessionAttendanceResponse s : data) {
+            Row row = sheet.createRow(rowIndex++);
+
+            row.createCell(0).setCellValue(s.getStudentName());
+            row.createCell(1).setCellValue(s.getStatus().name());
+            row.createCell(2).setCellValue(
+                    s.getCheckInTime() != null
+                            ? s.getCheckInTime().toString()
+                            : ""
+            );
+            row.createCell(3).setCellValue(
+                    s.getConfidenceScore() != null
+                            ? s.getConfidenceScore()
+                            : 0
+            );
+        }
+
+        for (int i = 0; i < 4; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            workbook.write(out);
+            workbook.close();
+            return new ByteArrayResource(out.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Export admin session lỗi");
+        }
     }
 }

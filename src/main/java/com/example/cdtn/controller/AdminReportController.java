@@ -139,7 +139,7 @@ public class AdminReportController {
     ) {
 
         ByteArrayResource file =
-                reportService.exportClassMatrixExcel(classId);
+                reportService.exportClassMatrixExcelForAdmin(classId);
 
         return ResponseEntity.ok()
                 .header(
@@ -161,7 +161,7 @@ public class AdminReportController {
     ) {
 
         ByteArrayResource file =
-                reportService.exportSessionExcel(sessionId);
+                reportService.exportSessionExcelForAdmin(sessionId);
 
         return ResponseEntity.ok()
                 .header(
