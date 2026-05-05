@@ -7,6 +7,7 @@ import com.example.cdtn.dto.response.MetaData;
 import com.example.cdtn.dto.response.StudentResponse;
 import com.example.cdtn.entity.enums.Status;
 import com.example.cdtn.service.ClassesService;
+import com.example.cdtn.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,11 @@ import java.util.List;
 public class ClassesController {
 
     private final ClassesService classesService;
+    private final StudentService studentService;
 
-    public ClassesController(ClassesService classesService) {
+    public ClassesController(ClassesService classesService, StudentService studentService) {
         this.classesService = classesService;
+        this.studentService = studentService;
     }
 
     @GetMapping
@@ -122,6 +125,39 @@ public class ClassesController {
                         Status.SUCCESS,
                         "",
                         null)
+        );
+    }
+    @GetMapping("/students")
+    public ResponseEntity<ApiResponse<List<StudentResponse>>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Page<StudentResponse> studentPage = studentService.getAllStudents(page, size);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "Lấy danh sách sinh viên thành công",
+                        Status.SUCCESS,
+                        "",
+                        studentPage.getContent(),
+                        new MetaData(
+                                studentPage.getNumber(),
+                                studentPage.getTotalPages()
+                        )
+                )
+        );
+    }
+    @GetMapping("/students/search")
+    public ResponseEntity<ApiResponse<StudentResponse>> search(@RequestParam String studentCode){
+        StudentResponse student = studentService.getByStudentCode(studentCode);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        "Lấy sinh viên thành công",
+                        Status.SUCCESS,
+                        "",
+                        student
+                )
         );
     }
 }
